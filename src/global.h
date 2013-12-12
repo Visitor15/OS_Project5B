@@ -14,6 +14,8 @@
 #include <iostream>
 #include <vector>
 
+#define MAX_PROCESSES			60
+#define PROCESS_COUNT			60
 #define MIN_BURST				10
 #define MAX_BURST				200
 #define MIN_MEMORY_PER_PROC 	10
@@ -25,6 +27,9 @@
 #define SLEEP_LENGTH			250
 #define ENABLE_COMPACTION		1
 
+static const char			EMPTY			= ' ';
+static const char 			KERNEL_PROC_ID 	= '@';
+static const unsigned int 	DEF_KERNEL_SIZE = 120;
 
 
 #endif /* GLOBAL_H_ */
