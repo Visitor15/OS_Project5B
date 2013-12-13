@@ -13,11 +13,13 @@
 #include <stdio.h>
 #include <iostream>
 #include <vector>
+#include <cstdio>
+#include <unistd.h>
 
 #define MAX_PROCESSES			60
 #define PROCESS_COUNT			60
-#define MIN_BURST				10
-#define MAX_BURST				200
+#define MIN_BURST				5
+#define MAX_BURST				15
 #define MIN_MEMORY_PER_PROC 	10
 #define MAX_MEMORY_PER_PROC 	250
 #define MAX_MEMORY 				1040

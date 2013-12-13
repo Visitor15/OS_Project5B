@@ -30,10 +30,17 @@ public:
 private:
 	char 					MAIN_MEMORY[MAX_MEMORY];
 	std::vector<proc_t> 	BACKING_STORE;
+	std::vector<proc_t>		RUNNING_QUEUE;
 
 	void init_mem(bool init_kernel);
 
-	bool load_process(proc_t proc);
+	void execute_cycle();
+
+	bool load_process(proc_t &proc);
+
+	bool unload_process(proc_t &proc);
+
+	bool has_cycle();
 
 	bool request_free_memory(proc_t &proc);
 

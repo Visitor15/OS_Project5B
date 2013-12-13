@@ -10,9 +10,5 @@ process.o : process.cpp process.h
 partone.o : partone.cpp partone.h global.h
 	g++ -c -g -Wall -Wsign-compare partone.cpp
 
-all :
-	make
-	make clean
-
 clean :
 	rm -f $(objects) log*.txt core

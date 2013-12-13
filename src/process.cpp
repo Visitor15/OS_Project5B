@@ -65,8 +65,6 @@ char process::generate_proc_ID() {
 	int _index = (rand() & PROC_ID_LIST.size() - 1);
 	int _size = PROC_ID_LIST.size();
 
-	std::cout << "SIZE IS: " << _size << std::endl;
-
 	proc_ID = PROC_ID_LIST.at(_index);
 
 	// Erasing char from list

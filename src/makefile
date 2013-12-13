@@ -1,6 +1,6 @@
 objects = partone.o process.o
 
-all: $(objects)
+all : $(objects)
 	g++ -o project5B $(objects)
 	make clean
 
