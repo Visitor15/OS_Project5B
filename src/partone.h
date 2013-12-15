@@ -5,17 +5,11 @@
  *      Author: visitor15
  */
 
-#ifndef PARTTWO_H_
-#define PARTTWO_H_
+#ifndef PARTONE_H_
+#define PARTONE_H_
 
 #include "global.h"
 #include "process.h"
-
-enum START_VALUE {
-	FIRST_FIT = 0,
-	BEST_FIT = 1,
-	WORST_FIT = 2
-};
 
 class part_one {
 public:
@@ -32,7 +26,7 @@ private:
 	std::vector<proc_t> 	BACKING_STORE;
 	std::vector<proc_t>		RUNNING_QUEUE;
 
-	void init_mem(bool init_kernel);
+	void init_memory();
 
 	void execute_cycle();
 
@@ -58,4 +52,4 @@ private:
 	void print_memory_map();
 };
 
-#endif /* PARTTWO_H_ */
+#endif /* PARTONE_H_ */

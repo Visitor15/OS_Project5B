@@ -9,6 +9,7 @@
 #define PROCESS_H_
 
 #include "global.h"
+#include "memory.h"
 
 #define LOWER_L 108
 #define UPPER_I 73
