@@ -58,7 +58,10 @@ void part_two::start() {
 	load_process(kernel);
 
 	process::GENERATE_PROCS(READY_QUEUE, MAX_PROCESSES_P2);
-
+	for (int i = 0; i < MAX_PROCESSES_P2; i++) {
+		process::CREATE_PROC_SEGMENTS(READY_QUEUE.at(i));
+	}
+	std::cout << "LOLLIPOP" << std::endl;
 	/*
 	 * MAIN LOOP
 	 */
@@ -81,7 +84,66 @@ void part_two::init_memory() {
 }
 
 void part_two::execute_cycle() {
+	bool _should_continue = false;
+	int _index;
+	proc_t* process;
+	segment_t* seg;
+	if (RUNNING_QUEUE.size() > 0) {
+		_index = (rand() % RUNNING_QUEUE.size());
 
+		// Touching random process
+		process = &RUNNING_QUEUE.at(_index);
+	} else if (READY_QUEUE.size() > 0) {
+		_index = (rand() % READY_QUEUE.size());
+
+		// Touching random process
+		process = &READY_QUEUE.at(_index);
+	}
+	// Getting index for subroutine segment
+	_index = (rand() % (process->SEGMENTS.size() - SEGMENT_ROUTINE))
+			+ SEGMENT_ROUTINE;
+	int i = 0;
+	do {
+		try {
+
+			for (; i < SEGMENT_ROUTINE; i++) {
+				seg = &process->SEGMENTS.at(i);
+				seg->touch();
+			}
+
+			// Touching random subroutine segment
+			seg = &process->SEGMENTS.at(_index);
+			seg->touch();
+
+			_should_continue = false;
+
+		} catch (PageFaultException &e) {
+//			std::cout << "HIT FOR: " << e._index << std::endl;
+			if (!request_free_frame(seg->PAGES[e._index])) {
+				/* If we couldn't get a free frame, we assume the main memory
+				 * is full so we default to removing a random proc's registered
+				 * memory frame and use that one.
+				 */
+				_index = (rand() % RUNNING_QUEUE.size());
+				proc_t * _proc = &RUNNING_QUEUE.at(_index);
+				_index = (rand() % _proc->SEGMENTS.size());
+				segment_t * _segment = &(*_proc).SEGMENTS.at(_index);
+				_index = (rand() % _segment->PAGE_COUNT);
+
+				seg->PAGES[e._index].ALLOC_FRAME_INDEX =
+						_segment->PAGES[_index].ALLOC_FRAME_INDEX;
+				_segment->PAGES[_index].ALLOC_FRAME_INDEX = -1;
+
+				write_to_frame(process->PID, _segment->ID,
+						_segment->PAGES[e._index].ALLOC_FRAME_INDEX);
+				delete _proc;
+				delete _segment;
+				std::cout << " LALALA " << std::endl;
+			}
+
+			_should_continue = true;
+		}
+	} while (_should_continue);
 }
 
 bool part_two::load_process(proc_t &proc) {
@@ -92,6 +154,19 @@ bool part_two::unload_process(proc_t &proc) {
 	return true;
 }
 
-void part_two::print_memory_map() {
+bool part_two::request_free_frame(mem_page_t &page) {
+	for(int i = 0; i < MAX_FRAMES; i++) {
 
+	}
+}
+
+void part_two::write_to_frame(char PID, char segment_ID, int frame_index) {
+	MAIN_MEMORY[frame_index].DATA[0] = PID;
+	MAIN_MEMORY[frame_index].DATA[1] = segment_ID;
+}
+
+void part_two::print_memory_map() {
+	for (int i = 0; i < MAX_FRAMES; i++) {
+		std::cout << MAIN_MEMORY[i].DATA << std::endl;
+	}
 }

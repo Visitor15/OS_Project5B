@@ -48,6 +48,41 @@ bool process::GENERATE_PROCS(std::vector<proc_t> &proc_list, int count) {
 	return true;
 }
 
+void process::CREATE_PROC_SEGMENTS(proc_t &proc) {
+	segment_t code_segment;
+	code_segment.ID = '0';
+	mem_page_t code_pages[2];
+	code_segment.add_pages(code_pages, 2);
+	proc.SEGMENTS.push_back(code_segment);
+
+	segment_t stack_segment;
+	stack_segment.ID = '1';
+	mem_page_t stack_pages[3];
+	stack_segment.add_pages(stack_pages, 3);
+	proc.SEGMENTS.push_back(stack_segment);
+
+	segment_t heap_segment;
+	heap_segment.ID = '2';
+	mem_page_t heap_pages[5];
+	heap_segment.add_pages(heap_pages, 5);
+	proc.SEGMENTS.push_back(heap_segment);
+
+	char _id[1];
+	int _count = ((rand() % 4) + 1);
+	for(int i = 0; i < _count; ++i) {
+		segment_t routine_seg;
+		std::string tmp_str = "";
+		std::stringstream str_stream;
+		str_stream << i;
+		tmp_str = str_stream.str().c_str();
+		strcpy(&routine_seg.ID, tmp_str.c_str());
+		mem_page_t routine_pages[2];
+		routine_seg.add_pages(routine_pages, 2);
+
+		proc.SEGMENTS.push_back(routine_seg);
+	}
+}
+
 void process::init_proc_IDs() {
 	int i;
 	for (i = 48; i < 58; i++) {

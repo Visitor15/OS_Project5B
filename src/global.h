@@ -15,6 +15,8 @@
 #include <vector>
 #include <cstdio>
 #include <unistd.h>
+#include <string.h>
+#include <sstream>
 
 /*
  *	PART ONE VARIABLES
@@ -55,6 +57,10 @@
 static const char			EMPTY			= ' ';
 static const char 			KERNEL_PROC_ID 	= '@';
 static const unsigned int 	DEF_KERNEL_SIZE = 120;
+static const unsigned int	SEGMENT_CODE	= 0;
+static const unsigned int	SEGMENT_STACK	= 1;
+static const unsigned int	SEGMENT_HEAP	= 2;
+static const unsigned int	SEGMENT_ROUTINE	= 3;
 
 enum START_VALUE {
 	FIRST_FIT		= 0,
@@ -64,6 +70,7 @@ enum START_VALUE {
 	LRU				= 4,
 	SECOND_CHANCE	= 5
 };
+
 
 
 #endif /* GLOBAL_H_ */

@@ -10,15 +10,34 @@
 
 #include "global.h"
 #include "memory.h"
+#include "page_fault_exception.h"
 
 #define LOWER_L 108
 #define UPPER_I 73
 
 struct segment_t {
+	char					ID;
+	char					DATA[0];
 	unsigned int 			BASE;
 	unsigned int 			LIMIT;
-	char					DATA[0];
+	unsigned int			SEGMENT_TYPE;
 
+	std::vector<mem_page_t>	PAGES;
+	unsigned int			PAGE_COUNT;
+
+	void add_pages(mem_page_t pages[], int page_count) {
+		for(int i = 0; i < page_count; i++) {
+			PAGES.push_back(pages[i]);
+		}
+	}
+
+	void touch() {
+		for(int i = 0; i < PAGE_COUNT; i++) {
+			if(PAGES.at(i).ALLOC_FRAME_INDEX == -1) {
+				throw PageFaultException(i);
+			}
+		}
+	}
 };
 
 struct proc_t {
@@ -34,6 +53,7 @@ class process {
 public:
 	static bool GENERATE_KERNEL_PROC(proc_t &proc, int segment_count);
 	static bool GENERATE_PROCS(std::vector<proc_t> &proc_list, int count);
+	static void CREATE_PROC_SEGMENTS(proc_t &proc);
 
 private:
 	std::vector<char> PROC_ID_LIST;

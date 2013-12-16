@@ -11,6 +11,7 @@
 #include "global.h"
 #include "process.h"
 #include "memory.h"
+#include "page_fault_exception.h"
 
 class part_two {
 public:
@@ -35,6 +36,10 @@ private:
 	bool load_process(proc_t &proc);
 
 	bool unload_process(proc_t &proc);
+
+	void write_to_frame(char PID, char segment_ID, int frame_index);
+
+	bool request_free_frame(mem_page_t &page);
 
 	bool has_cycle();
 
