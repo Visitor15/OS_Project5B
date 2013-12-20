@@ -26,6 +26,7 @@ struct segment_t {
 	unsigned int			PAGE_COUNT;
 
 	void add_pages(mem_page_t pages[], int page_count) {
+		PAGE_COUNT = page_count;
 		for(int i = 0; i < page_count; i++) {
 			PAGES.push_back(pages[i]);
 		}

@@ -21,7 +21,7 @@
 /*
  *	PART ONE VARIABLES
  */
-#define MAX_PROCESSES_P1		200
+#define MAX_PROCESSES_P1		60
 #define PROCESS_COUNT_P1		60
 #define MIN_BURST				5
 #define MAX_BURST				15
@@ -54,6 +54,7 @@
  *	END PART TWO
  */
 
+static const char			EMPTY_INDEX		= '-1';
 static const char			EMPTY			= ' ';
 static const char 			KERNEL_PROC_ID 	= '@';
 static const unsigned int 	DEF_KERNEL_SIZE = 120;

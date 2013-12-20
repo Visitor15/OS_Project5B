@@ -13,6 +13,12 @@
  */
 struct mem_frame_t {
 	char DATA[2];
+	bool ALLOCATED;
+
+	mem_frame_t() :
+		ALLOCATED(false) {
+		std::fill(DATA, (DATA + 2), '-1');
+	}
 };
 
 /*
