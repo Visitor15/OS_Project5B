@@ -21,6 +21,7 @@ struct segment_t {
 	unsigned int 			BASE;
 	unsigned int 			LIMIT;
 	unsigned int			SEGMENT_TYPE;
+	bool					IS_LOADED;
 
 	std::vector<mem_page_t>	PAGES;
 	unsigned int			PAGE_COUNT;

@@ -29,6 +29,10 @@ struct mem_page_t {
 
 	mem_page_t() :
 		ALLOC_FRAME_INDEX(-1) {};
+
+	void clear_page() {
+		ALLOC_FRAME_INDEX = -1;
+	}
 };
 
 
