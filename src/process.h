@@ -35,6 +35,7 @@ struct segment_t {
 
 	void touch() {
 		for(int i = 0; i < PAGE_COUNT; i++) {
+			std::cout << "TOUCH FRAME INDEX: " << PAGES.at(i).ALLOC_FRAME_INDEX << std::endl;
 			if(PAGES.at(i).ALLOC_FRAME_INDEX == -1) {
 				throw PageFaultException(i);
 			}

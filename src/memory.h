@@ -17,7 +17,9 @@ struct mem_frame_t {
 
 	mem_frame_t() :
 		ALLOCATED(false) {
-		std::fill(DATA, (DATA + 2), '-1');
+//		std::fill(DATA, (DATA + 2), '-1');
+		DATA[0] = '-1';
+		DATA[1] = '-1';
 	}
 };
 

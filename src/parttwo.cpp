@@ -68,7 +68,7 @@ void part_two::start() {
 	do {
 //		sleep(1);
 		execute_cycle();
-		print_memory_map();
+//		print_memory_map();
 
 	} while (has_cycle());
 
@@ -88,6 +88,20 @@ void part_two::execute_cycle() {
 	int _index;
 	proc_t* process;
 	segment_t* seg;
+
+	for (int i = 0; i < RUNNING_QUEUE.size(); i++) {
+		int _burst_time = RUNNING_QUEUE.at(i).BURST_TIME;
+		RUNNING_QUEUE.at(i).BURST_TIME = (_burst_time - 1);
+
+		if (RUNNING_QUEUE.at(i).BURST_TIME == 0) {
+			if (unload_process(RUNNING_QUEUE.at(i))) {
+
+				std::cout << "Erasing at " << i << std::endl;
+				RUNNING_QUEUE.erase(RUNNING_QUEUE.begin() + i);
+			}
+		}
+	}
+
 	if (RUNNING_QUEUE.size() > 0) {
 		_index = (rand() % RUNNING_QUEUE.size());
 
@@ -98,143 +112,181 @@ void part_two::execute_cycle() {
 
 		// Touching random process
 		process = &RUNNING_QUEUE.at(_index);
-	}
+
 //	else if (READY_QUEUE.size() > 0) {
 //		_index = (rand() % READY_QUEUE.size());
 //
 //		// Touching random process
 //		process = &READY_QUEUE.at(_index);
 //	}
-	// Getting index for subroutine segment
-	_index = (rand() % (process->SEGMENTS.size() - SEGMENT_ROUTINE))
-			+ SEGMENT_ROUTINE;
+		// Getting index for subroutine segment
+		_index = (rand() % (process->SEGMENTS.size() - SEGMENT_ROUTINE))
+				+ SEGMENT_ROUTINE;
 //	do {
-	std::cout << " HIT HIT HIT " << std::endl;
-	try {
+		std::cout << " HIT HIT HIT " << std::endl;
 
 		for (int i = 0; i < SEGMENT_ROUTINE; i++) {
 			seg = &process->SEGMENTS.at(i);
-			seg->touch();
-		}
+			try {
+				seg->touch();
 
-		// Touching random subroutine segment
-		seg = &process->SEGMENTS.at(_index);
-		seg->touch();
-		seg->IS_LOADED = true;
-	} catch (PageFaultException &e) {
-//		std::cout << "HIT FOR: " << e._index << " ON PROC: " << process->PID
-//				<< std::endl;
-		if (!request_free_frame(seg->PAGES[e._index])) {
+				// Touching random subroutine segment
+				seg = &process->SEGMENTS.at(_index);
+				seg->touch();
+				seg->IS_LOADED = true;
+			} catch (PageFaultException &e) {
+				std::cout << "HIT FOR: " << e._index << " ON PROC: "
+						<< process->PID << std::endl;
+				if (!request_free_frame(seg->PAGES[e._index])) {
 //			std::cout << " 'MERICA!" << std::endl;
-			/* If we couldn't get a free frame, we assume the main memory
-			 * is full so we default to removing a random proc's registered
-			 * memory frame and use that one.
-			 */
-			int _index = 0;
-			do {
-//				std::cout << " LALA : " << RUNNING_QUEUE.size() << std::endl;
-				for (int num = 0; num < RUNNING_QUEUE.size(); num++) {
+					/* If we couldn't get a free frame, we assume the main memory
+					 * is full so we default to removing a random proc's registered
+					 * memory frame and use that one.
+					 */
+					int _index = 0;
+//			do {
+					std::cout << " LALA : " << RUNNING_QUEUE.size()
+							<< std::endl;
+					for (int num = 0; num < RUNNING_QUEUE.size(); num++) {
 //					std::cout << " JINKA: " << num << " PROC: "
 //							<< RUNNING_QUEUE.at(num).PID << std::endl;
-					if (RUNNING_QUEUE.at(num).PID != KERNEL_PROC_ID) {
-						_index = num;
-						proc_t * _proc = &RUNNING_QUEUE.at(num);
+						if (RUNNING_QUEUE.at(num).PID != KERNEL_PROC_ID) {
+							_index = num;
+							proc_t * _proc = &RUNNING_QUEUE.at(num);
 
-//						std::cout << "PROC: " << _proc->PID << std::endl;
+							std::cout << "PROC: " << _proc->PID << std::endl;
 
-						for (int k = 0; k < _proc->SEGMENTS.size(); k++) {
-							if (_proc->SEGMENTS.at(k).IS_LOADED) {
-								segment_t * _segment = &_proc->SEGMENTS.at(k);
-//								std::cout << " DOOKIE : " << _segment->ID
-//										<< " PAGE COUNT: "
-//										<< _segment->PAGE_COUNT << std::endl;
-								for (int j = 0; j < _segment->PAGE_COUNT; j++) {
-//									std::cout << "THINGS: "
-//											<< _segment->PAGES.at(j).ALLOC_FRAME_INDEX
-//											<< std::endl;
-									if (_segment->PAGES.at(j).ALLOC_FRAME_INDEX
-											!= -1) {
-										seg->PAGES.at(e._index).ALLOC_FRAME_INDEX =
-												_segment->PAGES.at(j).ALLOC_FRAME_INDEX;
+							for (int k = 0; k < _proc->SEGMENTS.size(); k++) {
+//						std::cout << "SEG: " << _proc->SEGMENTS.at(k).ID
+//								<< std::endl;
+								if (_proc->SEGMENTS.at(k).IS_LOADED) {
+									segment_t * _segment = &_proc->SEGMENTS.at(
+											k);
+									std::cout << " DOOKIE : " << _segment->ID
+											<< " PAGE COUNT: "
+											<< _segment->PAGE_COUNT
+											<< std::endl;
+									for (int j = 0; j < _segment->PAGE_COUNT;
+											j++) {
+										std::cout << "THINGS: "
+												<< _segment->PAGES.at(j).ALLOC_FRAME_INDEX
+												<< std::endl;
+										if (_segment->PAGES.at(j).ALLOC_FRAME_INDEX
+												!= -1) {
+											seg->PAGES.at(e._index).ALLOC_FRAME_INDEX =
+													_segment->PAGES.at(j).ALLOC_FRAME_INDEX;
 
-										write_to_frame(process->PID, seg->ID,
-												seg->PAGES.at(e._index).ALLOC_FRAME_INDEX);
+											_segment->PAGES.at(j).ALLOC_FRAME_INDEX =
+													-1;
 
-										_segment->PAGES.at(j).clear_page();
+											std::cout << " WRITING PROC: "
+													<< process->PID
+													<< " AT INDEX: "
+													<< seg->PAGES.at(e._index).ALLOC_FRAME_INDEX
+													<< std::endl;
+											write_to_frame(process->PID,
+													seg->ID,
+													seg->PAGES.at(e._index).ALLOC_FRAME_INDEX);
 
-										_should_continue = false;
+											_segment->PAGES.at(j).clear_page();
 
-										// Checking if any pages are currently loaded for the segment.
-										// Setting param.
-										bool is_loaded = false;
-										for (int i = 0;
-												i < _segment->PAGE_COUNT; i++) {
-											if (_segment->PAGES.at(i).ALLOC_FRAME_INDEX
-													!= -1) {
+											_should_continue = false;
+
+											// Checking if any pages are currently loaded for the segment.
+											// Setting param.
+											bool is_loaded = false;
+											for (int i = 0;
+													i < _segment->PAGE_COUNT;
+													i++) {
+												if (_segment->PAGES.at(i).ALLOC_FRAME_INDEX
+														!= -1) {
 //												std::cout
 //														<< "SETTING TO TRUE FOR INDEX: "
 //														<< _segment->PAGES.at(i).ALLOC_FRAME_INDEX
 //														<< std::endl;
-												is_loaded = true;
-											} else {
-												is_loaded = false;
+													is_loaded = true;
+												} else {
+													is_loaded = false;
+												}
 											}
-										}
-										_segment->IS_LOADED = is_loaded;
+											_segment->IS_LOADED = is_loaded;
 
-										for (int i = 0;
-												i < _proc->SEGMENTS.size();
-												i++) {
+											for (int i = 0;
+													i < _proc->SEGMENTS.size();
+													i++) {
 
-											for (int k = 0;
-													k
-															< _proc->SEGMENTS.at(
-																	i).PAGE_COUNT;
-													k++) {
-												if (_proc->SEGMENTS.at(i).PAGES.at(
-														k).ALLOC_FRAME_INDEX
-														!= -1) {
+												for (int k = 0;
+														k
+																< _proc->SEGMENTS.at(
+																		i).PAGE_COUNT;
+														k++) {
+													if (_proc->SEGMENTS.at(i).PAGES.at(
+															k).ALLOC_FRAME_INDEX
+															!= -1) {
 //													std::cout << "HIT BITCHES"
 //															<< std::endl;
-													is_loaded = true;
+														is_loaded = true;
+													}
+
 												}
 
 											}
 
-										}
+											if (!is_loaded) {
+												READY_QUEUE.push_back(*_proc);
+												std::cout
+														<< "ERASING AT INDEX: "
+														<< num << " PROC: "
+														<< RUNNING_QUEUE.at(num).PID
+														<< " RUNNING SIZE: "
+														<< RUNNING_QUEUE.size()
+														<< std::endl;
 
-										if (!is_loaded) {
-											//												READY_QUEUE.push_back(*_proc);
-											RUNNING_QUEUE.erase(
-													RUNNING_QUEUE.begin()
-															+ num);
-										}
+												RUNNING_QUEUE.erase(
+														RUNNING_QUEUE.begin()
+																+ num);
+
+												std::cout
+														<< "AFTER ERASE - SIZE: "
+														<< RUNNING_QUEUE.size()
+														<< std::endl;
+
+											}
+
+											std::cout << "BREAKING LOOP!"
+													<< std::endl;
+											_should_continue = false;
+											break;
 
 //										execute_cycle();
 
-									} else {
-//										std::cout << " TOM TOM TOM BOMBADILL "
-//												<< std::endl;
+										}
 									}
 								}
-							} else {
-								// NOTHING
-//								std::cout << "TANGO TANGO MAN DOWN" << std::endl;
+
+								if (!_should_continue) {
+									break;
+								}
+							}
+							if (!_should_continue) {
+								break;
 							}
 						}
-					} else {
-//							std::cout << " MOTHERFUCKER " << std::endl;
+						if (!_should_continue) {
+							break;
+						}
 					}
 
+//			} while (_should_continue);
+				} else {
+					write_to_frame(process->PID, seg->ID,
+							seg->PAGES.at(e._index).ALLOC_FRAME_INDEX);
+
+					std::cout << "WROTE AT INDEX: "
+							<< seg->PAGES.at(e._index).ALLOC_FRAME_INDEX
+							<< std::endl;
 				}
-
-			} while (_should_continue);
-		} else {
-			write_to_frame(process->PID, seg->ID,
-					seg->PAGES.at(e._index).ALLOC_FRAME_INDEX);
-
-			std::cout << "WROTE AT INDEX: "
-					<< seg->PAGES.at(e._index).ALLOC_FRAME_INDEX << std::endl;
+			}
 		}
 	}
 }

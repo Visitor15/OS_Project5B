@@ -23,8 +23,8 @@
  */
 #define MAX_PROCESSES_P1		60
 #define PROCESS_COUNT_P1		60
-#define MIN_BURST				5
-#define MAX_BURST				15
+#define MIN_BURST				50
+#define MAX_BURST				250
 #define MIN_MEMORY_PER_PROC 	10
 #define MAX_MEMORY_PER_PROC 	250
 #define MAX_MEMORY 				1040
