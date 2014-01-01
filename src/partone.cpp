@@ -58,7 +58,7 @@ void part_one::start() {
 	load_process(kernel);
 	print_memory_map();
 
-	process::GENERATE_PROCS(BACKING_STORE, MAX_PROCESSES_P1);
+	process::GENERATE_PROCS(BACKING_STORE, MAX_PROCESSES_P1, false);
 
 	/*
 	 * MAIN LOOP

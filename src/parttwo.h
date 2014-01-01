@@ -31,7 +31,9 @@ private:
 
 	void init_memory();
 
-	void execute_cycle();
+	void cycle();
+
+	void execute_cycle(proc_t* process);
 
 	bool load_process(proc_t &proc);
 
@@ -41,9 +43,15 @@ private:
 
 	bool request_free_frame(mem_page_t &page);
 
+	bool request_free_pages(std::vector<mem_page_t> &page_list);
+
 	bool has_cycle();
 
 	void print_memory_map();
+
+	void print_page_table();
+
+	void print_backing_store();
 };
 
 #endif /* PARTTWO_H_ */

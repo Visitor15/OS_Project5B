@@ -14,6 +14,7 @@
 #include <iostream>
 #include <vector>
 #include <cstdio>
+#include <ctype.h>
 #include <unistd.h>
 #include <string.h>
 #include <sstream>
@@ -23,8 +24,8 @@
  */
 #define MAX_PROCESSES_P1		60
 #define PROCESS_COUNT_P1		60
-#define MIN_BURST				50
-#define MAX_BURST				250
+#define MIN_BURST				60
+#define MAX_BURST				120
 #define MIN_MEMORY_PER_PROC 	10
 #define MAX_MEMORY_PER_PROC 	250
 #define MAX_MEMORY 				1040
@@ -40,7 +41,7 @@
 /*
  *	PART TWO VARIABLES
  */
-#define MAX_PROCESSES_P2		52
+#define MAX_PROCESSES_P2		22
 #define PROCESS_COUNT_P2		23
 #define MIN_DEATH_INTERVAL		20
 #define MAX_DEATH_INTERVAL		300

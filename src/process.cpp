@@ -20,7 +20,7 @@ bool process::GENERATE_KERNEL_PROC(proc_t &proc, int segment_count) {
 	return true;
 }
 
-bool process::GENERATE_PROCS(std::vector<proc_t> &proc_list, int count) {
+bool process::GENERATE_PROCS(std::vector<proc_t> &proc_list, int count, bool filter_num_PIDs) {
 
 	if (!p_instance) {
 		static process m_Self;
@@ -30,13 +30,12 @@ bool process::GENERATE_PROCS(std::vector<proc_t> &proc_list, int count) {
 
 	for (int i = 0; i < count; i++) {
 		proc_t proc;
-		proc.PID = p_instance->generate_proc_ID();
+		proc.PID = p_instance->generate_proc_ID(filter_num_PIDs);
 		proc.SIZE = p_instance->generate_proc_SIZE();
 		proc.BURST_TIME = p_instance->generate_proc_BURST_TIME();
-		proc.SEGMENTS.push_back(segment_t());
 
 		if (proc.PID != EMPTY) {
-			std::cout << "GENERATED PROC: " << proc.PID << " SIZE: "
+			std::cout << "GENERATED PROC " << i << ": " << proc.PID << " SIZE: "
 					<< proc.SIZE << std::endl;
 
 			proc_list.push_back(proc);
@@ -68,14 +67,22 @@ void process::CREATE_PROC_SEGMENTS(proc_t &proc) {
 	proc.SEGMENTS.push_back(heap_segment);
 
 	char _id[1];
-	int _count = ((rand() % 4) + 1);
+	int _count = ((rand() % 5) + 1);
+	std::cout << "COUNT: " << _count << std::endl;
 	for(int i = 0; i < _count; ++i) {
 		segment_t routine_seg;
 		std::string tmp_str = "";
 		std::stringstream str_stream;
-		str_stream << i;
+		str_stream << (i + 3);
 		tmp_str = str_stream.str().c_str();
 		strcpy(&routine_seg.ID, tmp_str.c_str());
+
+		std::cout << "MADE ID: " << routine_seg.ID << std::endl;
+		if(routine_seg.ID == EMPTY) {
+			int input;
+			std::cin >> input;
+		}
+
 		mem_page_t routine_pages[2];
 		routine_seg.add_pages(routine_pages, 2);
 
@@ -102,14 +109,19 @@ void process::init_proc_IDs() {
 	}
 }
 
-char process::generate_proc_ID() {
+char process::generate_proc_ID(bool filter_nums) {
+	int _index = -1;
+	int _size;
 	char proc_ID = EMPTY;
-	if (PROC_ID_LIST.size() > 0) {
-		int _index = (rand() & PROC_ID_LIST.size() - 1);
-		int _size = PROC_ID_LIST.size();
+	do {
+		if (PROC_ID_LIST.size() > 0) {
+			_index = (rand() & PROC_ID_LIST.size() - 1);
+			_size = PROC_ID_LIST.size();
+			proc_ID = PROC_ID_LIST.at(_index);
+		}
+	} while((filter_nums && isdigit(proc_ID)));
 
-		proc_ID = PROC_ID_LIST.at(_index);
-
+	if(proc_ID != EMPTY && (_index > -1)) {
 		// Erasing char from list
 		PROC_ID_LIST.erase(PROC_ID_LIST.begin() + _index);
 	}

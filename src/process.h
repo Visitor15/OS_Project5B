@@ -34,11 +34,18 @@ struct segment_t {
 	}
 
 	void touch() {
-		for(int i = 0; i < PAGE_COUNT; i++) {
-			std::cout << "TOUCH FRAME INDEX: " << PAGES.at(i).ALLOC_FRAME_INDEX << std::endl;
+//		std::cout << "PAGE COUNT: " << PAGE_COUNT << " - ACTUAL SIZE: " << PAGES.size() << std::endl;
+
+		std::vector<int> indices;
+		for(int i = 0; i < PAGE_COUNT; ++i) {
+//			std::cout << "TOUCH FRAME INDEX: " << PAGES.at(i).ALLOC_FRAME_INDEX << std::endl;
 			if(PAGES.at(i).ALLOC_FRAME_INDEX == -1) {
-				throw PageFaultException(i);
+				indices.push_back(i);
 			}
+		}
+
+		if(indices.size() > 0) {
+			throw PageFaultException(indices);
 		}
 	}
 };
@@ -55,7 +62,7 @@ struct proc_t {
 class process {
 public:
 	static bool GENERATE_KERNEL_PROC(proc_t &proc, int segment_count);
-	static bool GENERATE_PROCS(std::vector<proc_t> &proc_list, int count);
+	static bool GENERATE_PROCS(std::vector<proc_t> &proc_list, int count, bool filter_num_PIDs);
 	static void CREATE_PROC_SEGMENTS(proc_t &proc);
 
 private:
@@ -65,7 +72,7 @@ private:
 	~process() {};
 
 	void init_proc_IDs();
-	char generate_proc_ID();
+	char generate_proc_ID(bool filter_nums);
 	unsigned int generate_proc_SIZE();
 	unsigned int generate_proc_BURST_TIME();
 };
