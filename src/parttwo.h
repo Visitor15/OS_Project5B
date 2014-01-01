@@ -43,7 +43,7 @@ private:
 
 	bool request_free_frame(mem_page_t &page);
 
-	bool request_free_pages(std::vector<mem_page_t> &page_list);
+	bool request_free_pages(std::vector<int> &indice_list, int count);
 
 	bool has_cycle();
 

@@ -73,6 +73,10 @@ void part_two::start() {
 	do {
 //		sleep(1);
 		cycle();
+
+//		print_memory_map();
+//		print_backing_store();
+
 //		print_memory_map();
 
 //		print_memory_map();
@@ -82,6 +86,7 @@ void part_two::start() {
 
 	std::cout << "\n\nFINISHED!\n\n" << std::endl;
 	print_memory_map();
+	print_backing_store();
 }
 
 bool part_two::has_cycle() {
@@ -131,97 +136,114 @@ void part_two::execute_cycle(proc_t* process) {
 		std::cout << "i is: " << i << std::endl;
 		seg = &process->SEGMENTS.at(i);
 		try {
-			std::cout << "1 TOUCHING SEG INDEX: " << i << " FOR SEG LIST SIZE: "
-					<< process->SEGMENTS.size() << std::endl;
+//			std::cout << "1 TOUCHING SEG INDEX: " << i << " FOR SEG LIST SIZE: "
+//					<< process->SEGMENTS.size() << std::endl;
 			seg->touch();
 
 			// Touching random subroutine segment
-			std::cout << "2 TOUCHING SEG INDEX: " << _index
-					<< " FOR SEG LIST SIZE: " << process->SEGMENTS.size()
-					<< std::endl;
+//			std::cout << "2 TOUCHING SEG INDEX: " << _index
+//					<< " FOR SEG LIST SIZE: " << process->SEGMENTS.size()
+//					<< std::endl;
 			seg = &process->SEGMENTS.at(_index);
 			seg->touch();
 			seg->IS_LOADED = true;
 
 			i++;
 		} catch (PageFaultException &e) {
-			std::cout << "PAGE FAULT" << std::endl;
+//			std::cout << "PAGE FAULT" << std::endl;
 			bool _should_continue = true;
 
 			// Request memory pages from BACKING_STORE here.
+			std::vector<int> mem_pages;
+			if (request_free_pages(mem_pages, e.indices.size())) {
 
-			for (int j = 0; j < e.indices.size(); j++) {
-				std::cout << "HIT! FOR LIST SIZE: " << e.indices.size()
-						<< " AND j: " << j << std::endl;
-				int _index = e.indices.at(j);
-				if (!request_free_frame(seg->PAGES[_index])) {
-					int _page_index = e.indices.at(j);
-					int _mem_index;
-					do {
+				for (int j = 0; j < e.indices.size(); j++) {
+//					std::cout << "HIT! FOR LIST SIZE: " << e.indices.size()
+//							<< " AND j: " << j << std::endl;
+					int _index = e.indices.at(j);
 
-						_mem_index = (rand() % MAX_FRAMES);
-					} while (MAIN_MEMORY[_mem_index].DATA[0] == KERNEL_PROC_ID);
+					if (!request_free_frame(seg->PAGES[_index])) {
+						int _page_index = e.indices.at(j);
+						int _mem_index;
+						do {
 
-					proc_t proc;
-					bool _has_proc;
-					int tmp_index = -1;
-					char PID = MAIN_MEMORY[_mem_index].DATA[0];
-					for (int i = 0; i < RUNNING_QUEUE.size(); i++) {
-						if (RUNNING_QUEUE.at(i).PID == PID) {
-							proc = RUNNING_QUEUE.at(i);
-							tmp_index = i;
-							_has_proc = true;
-							break;
-						}
-					}
+							_mem_index = (rand() % MAX_FRAMES);
+						} while (MAIN_MEMORY[_mem_index].DATA[0]
+								== KERNEL_PROC_ID);
 
-					if (_has_proc) {
-						_should_continue = true;
-						for (int j = 0; j < proc.SEGMENTS.size(); j++) {
-							segment_t segment = proc.SEGMENTS.at(j);
-							for (int k = 0; k < segment.PAGE_COUNT; k++) {
-								if (segment.PAGES.at(k).ALLOC_FRAME_INDEX
-										== _mem_index) {
-									segment.PAGES.at(k).ALLOC_FRAME_INDEX = -1;
-
-									RUNNING_QUEUE.at(tmp_index).SEGMENTS.at(j).PAGES.at(
-											k).ALLOC_FRAME_INDEX = -1;
-
-									std::cout << "GIVING INDEX: " << _mem_index
-											<< std::endl;
-									seg->PAGES.at(_page_index).ALLOC_FRAME_INDEX =
-											_mem_index;
-
-									_should_continue = false;
-
-									break;
-								}
-							}
-
-							if (!_should_continue) {
+						proc_t proc;
+						bool _has_proc;
+						int tmp_index = -1;
+						char PID = MAIN_MEMORY[_mem_index].DATA[0];
+						for (int i = 0; i < RUNNING_QUEUE.size(); i++) {
+							if (RUNNING_QUEUE.at(i).PID == PID) {
+								proc = RUNNING_QUEUE.at(i);
+								tmp_index = i;
+								_has_proc = true;
 								break;
 							}
 						}
-					} else {
-						std::cout << "GIVING INDEX: " << _mem_index
+
+						if (_has_proc) {
+							_should_continue = true;
+							for (int j = 0; j < proc.SEGMENTS.size(); j++) {
+								segment_t segment = proc.SEGMENTS.at(j);
+								for (int k = 0; k < segment.PAGE_COUNT; k++) {
+									if (segment.PAGES.at(k).ALLOC_FRAME_INDEX
+											== _mem_index) {
+										segment.PAGES.at(k).ALLOC_FRAME_INDEX =
+												-1;
+
+										RUNNING_QUEUE.at(tmp_index).SEGMENTS.at(
+												j).PAGES.at(k).ALLOC_FRAME_INDEX =
+												-1;
+
+//										std::cout << "GIVING INDEX: "
+//												<< _mem_index << std::endl;
+										seg->PAGES.at(_page_index).ALLOC_FRAME_INDEX =
+												_mem_index;
+
+										_should_continue = false;
+
+										break;
+									}
+								}
+
+								if (!_should_continue) {
+									break;
+								}
+							}
+						} else {
+//							std::cout << "GIVING INDEX: " << _mem_index
+//									<< std::endl;
+							seg->PAGES.at(_page_index).ALLOC_FRAME_INDEX =
+									_mem_index;
+						}
+
+						write_to_frame(process->PID, seg->ID,
+								seg->PAGES.at(_page_index).ALLOC_FRAME_INDEX);
+						std::cout << "WROTE AT INDEX: "
+								<< seg->PAGES.at(_index).ALLOC_FRAME_INDEX
 								<< std::endl;
-						seg->PAGES.at(_page_index).ALLOC_FRAME_INDEX =
-								_mem_index;
+
+						BACKING_STORE[mem_pages.at(j)].DATA[0] = process->PID;
+						BACKING_STORE[mem_pages.at(j)].DATA[1] = seg->ID;
+						BACKING_STORE[mem_pages.at(j)].ALLOC_FRAME_INDEX =
+								seg->PAGES.at(_index).ALLOC_FRAME_INDEX;
+
+					} else {
+						write_to_frame(process->PID, seg->ID,
+								seg->PAGES.at(_index).ALLOC_FRAME_INDEX);
+
+						std::cout << "WROTE AT INDEX 2: "
+								<< seg->PAGES.at(_index).ALLOC_FRAME_INDEX
+								<< std::endl;
+
+						BACKING_STORE[mem_pages.at(j)].DATA[0] = process->PID;
+						BACKING_STORE[mem_pages.at(j)].DATA[1] = seg->ID;
+						BACKING_STORE[mem_pages.at(j)].ALLOC_FRAME_INDEX =
+								seg->PAGES.at(_index).ALLOC_FRAME_INDEX;
 					}
-
-					write_to_frame(process->PID, seg->ID,
-							seg->PAGES.at(_page_index).ALLOC_FRAME_INDEX);
-					std::cout << "WROTE AT INDEX: "
-							<< seg->PAGES.at(_index).ALLOC_FRAME_INDEX
-							<< std::endl;
-
-				} else {
-					write_to_frame(process->PID, seg->ID,
-							seg->PAGES.at(_index).ALLOC_FRAME_INDEX);
-
-					std::cout << "WROTE AT INDEX: "
-							<< seg->PAGES.at(_index).ALLOC_FRAME_INDEX
-							<< std::endl;
 				}
 			}
 		}
@@ -262,14 +284,32 @@ bool part_two::request_free_frame(mem_page_t &page) {
 	return false;
 }
 
+bool part_two::request_free_pages(std::vector<int> &indices_list, int count) {
+
+	for (int i = 0; i < MAX_PAGES; i++) {
+		if (BACKING_STORE[i].ALLOC_FRAME_INDEX == -1) {
+			indices_list.push_back(i);
+
+			std::cout << "Adding: " << i << std::endl;
+
+			--count;
+			if (count == 0) {
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+
 void part_two::write_to_frame(char PID, char segment_ID, int frame_index) {
 //	std::cout << "WRITING! PID: " << PID << " SEG ID: " << segment_ID
 //			<< " FRAME INDEX: " << frame_index << std::endl;
 	MAIN_MEMORY[frame_index].DATA[0] = PID;
 	MAIN_MEMORY[frame_index].DATA[1] = segment_ID;
 
-	print_memory_map();
-	sleep(1);
+//	print_memory_map();
+//	sleep(1);
 }
 
 //void part_two::print_memory_map() {
@@ -357,7 +397,7 @@ void part_two::print_backing_store() {
 	//	formatDetails();
 
 	i = 0;
-	for (; i <= MAX_FRAMES; i++) {
+	for (; i <= MAX_PAGES; i++) {
 		switch (_print_state) {
 		case 0: {
 

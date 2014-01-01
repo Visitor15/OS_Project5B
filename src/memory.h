@@ -26,13 +26,19 @@ struct mem_frame_t {
  *	STRUCT
  */
 struct mem_page_t {
+	char DATA[2];
 	int ALLOC_FRAME_INDEX;
 
 	mem_page_t() :
-		ALLOC_FRAME_INDEX(-1) {};
+		ALLOC_FRAME_INDEX(-1) {
+		DATA[0] = EMPTY;
+		DATA[1] = EMPTY;
+	};
 
 	void clear_page() {
 		ALLOC_FRAME_INDEX = -1;
+		DATA[0] = EMPTY;
+		DATA[1] = EMPTY;
 	}
 };
 
